@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>RosKolhozBank</h1>
+<script>
+"use strict";
+function submitForm(oFormElement)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.onload = function(){ alert (xhr.responseText); } // success case
+  xhr.onerror = function(){ alert (xhr.responseText); } // failure case
+  xhr.open (oFormElement.method, oFormElement.action, true);
+  xhr.send (new FormData (oFormElement));
+  return false;
+}
+</script>
+<form action="/login" method="post" onsubmit="return submitForm(this);">
+    First name:<br>
+    <input type="text" name="login">
+    <br>
+    Last name:<br>
+    <input type="password" name="password">
+    <br><br>
+    <input type="submit" value="Login">
+</form>
+</body>
+</html>
