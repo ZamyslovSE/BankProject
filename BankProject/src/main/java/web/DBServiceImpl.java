@@ -1,5 +1,8 @@
 package web;
 
+import web.exception.InsufficientFundsException;
+import web.exception.UsernameTakenException;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -10,7 +13,7 @@ public class DBServiceImpl implements DBService{
 
     private Map<String, User> userMap = new ConcurrentHashMap<>();
 
-    public void registerUser(User user) throws UsernameTakenException{
+    public void registerUser(User user) throws UsernameTakenException {
         if (userMap.containsKey(user.getLogin())){
             throw new UsernameTakenException("Username taken.");
         } else {
@@ -33,7 +36,7 @@ public class DBServiceImpl implements DBService{
     }
 
     @Override
-    public void withdrawFunds(String passport, double amount) throws InsufficientFundsException{
+    public void withdrawFunds(String passport, double amount) throws InsufficientFundsException {
         User user = getUserByPassport(passport);
         if (user.getBalance() > amount){
             user.removeBalance(amount);

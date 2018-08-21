@@ -8,21 +8,25 @@
 <h1>RosKolhozBank</h1>
 <script>
 "use strict";
-function submitForm(oFormElement)
+function submitForm()
 {
-  var xhr = new XMLHttpRequest();
-  xhr.onload = function(){ alert (xhr.responseText); } // success case
-  xhr.onerror = function(){ alert (xhr.responseText); } // failure case
-  xhr.open (oFormElement.method, oFormElement.action, true);
-  xhr.send (new FormData (oFormElement));
-  return false;
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            alert("success: "+xhttp.responseText)
+        } else {
+            alert("error: "+xhttp.responseText)
+        }
+    };
+    xhttp.open("POST", "https://localhost:8443/login", true);
+    xhttp.send("login=zdb&password=zdb");
 }
 </script>
-<form action="/login" method="post" onsubmit="return submitForm(this);">
-    First name:<br>
+<form id="inputform" method="post" onsubmit="submitForm()">
+    Login:<br>
     <input type="text" name="login">
     <br>
-    Last name:<br>
+    Password:<br>
     <input type="password" name="password">
     <br><br>
     <input type="submit" value="Login">

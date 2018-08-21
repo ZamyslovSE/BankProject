@@ -1,5 +1,8 @@
 package web;
 
+import web.exception.InsufficientFundsException;
+import web.exception.UsernameTakenException;
+
 public interface DBService {
 
     void registerUser(User user) throws UsernameTakenException;

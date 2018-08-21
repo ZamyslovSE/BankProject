@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import web.exception.InsufficientFundsException;
+import web.exception.UsernameTakenException;
 
 import java.util.logging.Logger;
 
@@ -36,6 +38,7 @@ public class RESTController {
     @RequestMapping(value="/login", method = POST)
     public ResponseEntity<String> login(@RequestParam(value="login") String login,
                                         @RequestParam(value="password") String password) {
+        log.info(String.format("Login attempt with credentials: %s %s", login, password));
         User user = dbService.getUser(login);
         if (user != null){
             if (user.getPassword().equals(password)){
