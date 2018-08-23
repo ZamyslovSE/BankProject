@@ -2,26 +2,31 @@ package web;
 
 public class User {
     private long id;
-    private String login;
     private String passport;
     private String password;
-    private double balance;
+    String firstName;
+    String lastName;
+    String phoneNumber;
 
     public User(String login, String passport, String password) {
-        this.login=login;
         this.passport=passport;
         this.password=password;
-        this.balance=0.0;
     }
 
     public User() {
     }
 
     public User(String login, String password) {
-        this.login=login;
         this.passport=null;
         this.password=password;
-        this.balance=0.0;
+    }
+
+    public User(String passport, String password, String firstName, String lastName, String phoneNumber) {
+        this.passport=passport;
+        this.password=password;
+        this.firstName=firstName;
+        this.lastName=lastName;
+        this.phoneNumber=phoneNumber;
     }
 
     public long getId() {
@@ -32,13 +37,6 @@ public class User {
         this.id = id;
     }
 
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
 
     public String getPassport() {
         return passport;
@@ -56,11 +54,15 @@ public class User {
         this.password = password;
     }
 
-    public double getBalance() {
-        return balance;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 }
