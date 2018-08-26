@@ -1,9 +1,0 @@
-web\User.class
-web\ApplicationMain.class
-web\DBService.class
-web\exception\InsufficientFundsException.class
-web\exception\UsernameTakenException.class
-web\DBServiceImpl.class
-web\UserAuthRowMapper.class
-web\SpringJdbcConfig.class
-web\RESTController.class
