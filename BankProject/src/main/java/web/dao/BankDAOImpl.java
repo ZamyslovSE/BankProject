@@ -2,6 +2,7 @@ package web.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import web.User;
 import web.exception.InsufficientFundsException;
+import web.exception.UsernameTakenException;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -30,7 +32,7 @@ public class BankDAOImpl implements BankDAO {
     }
 
     @Override
-    public void addUser(User user) {
+    public void addUser(User user) throws UsernameTakenException {
 
         Map<String,String> params = new HashMap<>();
         params.put("password",user.getPassword());
@@ -38,8 +40,14 @@ public class BankDAOImpl implements BankDAO {
         params.put("first_name",user.getFirstName());
         params.put("last_name",user.getLastName());
         params.put("phone_number",user.getPhoneNumber());
-
-        jdbcTemplate.update("INSERT INTO Users(Passport, Password, first_name, last_name, phone_number) VALUES (:passport, :password, :first_name, :last_name, :phone_number)", params);
+        try {
+            jdbcTemplate.update("INSERT INTO Users(Passport, Password, first_name, last_name, phone_number) VALUES (:passport, :password, :first_name, :last_name, :phone_number)", params);
+        } catch (DuplicateKeyException e){
+//            e.printStackTrace();
+            throw new UsernameTakenException("Passport number taken",e);
+        } catch (DataAccessException e){
+            e.printStackTrace();
+        }
     }
 
     @Override

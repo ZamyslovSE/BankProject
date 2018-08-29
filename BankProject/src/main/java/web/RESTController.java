@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import web.dao.BankDAO;
 import web.dao.BankDAOImpl;
 import web.exception.InsufficientFundsException;
+import web.exception.UsernameTakenException;
 
 import java.util.logging.Logger;
 
@@ -25,13 +26,13 @@ public class RESTController {
     @RequestMapping(value="/register", method = POST)
     public ResponseEntity<String> register(@RequestParam(value="passport") String passport,
                                            @RequestParam(value="password") String password,
-                                           @RequestParam(value="first_name") String firstName,
-                                           @RequestParam(value="last_name") String lastName,
-                                           @RequestParam(value="phone_number") String phoneNumber) {
+                                           @RequestParam(value="first_name", required = false) String firstName,
+                                           @RequestParam(value="last_name", required = false) String lastName,
+                                           @RequestParam(value="phone_number", required = false) String phoneNumber) {
             try {
                 bankDAO.addUser(new User(passport, password, firstName, lastName, phoneNumber));
                 return new ResponseEntity<>("Registration success.", HttpStatus.OK);
-            } catch (DuplicateKeyException e){
+            } catch (UsernameTakenException e){
                 return new ResponseEntity<>("Account with this passport number already exists.", HttpStatus.BAD_REQUEST);
             } catch (DataAccessException e){
                 e.printStackTrace();

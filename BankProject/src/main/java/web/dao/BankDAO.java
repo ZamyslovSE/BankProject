@@ -2,10 +2,11 @@ package web.dao;
 
 import web.User;
 import web.exception.InsufficientFundsException;
+import web.exception.UsernameTakenException;
 
 public interface BankDAO {
 
-    void addUser(User user);
+    void addUser(User user) throws UsernameTakenException;
     User findUserByPassport(String passport);
 
     void withdrawFunds(String passport, double amount) throws InsufficientFundsException;
