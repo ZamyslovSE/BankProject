@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import web.User;
 import web.exception.InsufficientFundsException;
+import web.exception.UserNotFoundException;
 import web.exception.UsernameTakenException;
 
 import javax.sql.DataSource;
@@ -51,21 +52,24 @@ public class BankDAOImpl implements BankDAO {
     }
 
     @Override
-    public User findUserByPassport(String passport) {
+    public User findUserByPassport(String passport) throws UserNotFoundException {
 
         log.info(String.format("Try to retrieve user %s",passport));
 
         Map<String,String> params = new HashMap<>();
         params.put("passport",passport);
-
-        User user = jdbcTemplate.queryForObject("SELECT id, passport, password FROM Users WHERE Passport =:passport", params, (resultSet, i) -> {
-            User user1 = new User();
-            user1.setId(resultSet.getInt("id"));
-            user1.setPassport(resultSet.getString("passport"));
-            user1.setPassword(resultSet.getString("password"));
-            return user1;
-        });
-        return user;
+        try {
+            User user = jdbcTemplate.queryForObject("SELECT id, passport, password FROM Users WHERE Passport =:passport", params, (resultSet, i) -> {
+                User user1 = new User();
+                user1.setId(resultSet.getInt("id"));
+                user1.setPassport(resultSet.getString("passport"));
+                user1.setPassword(resultSet.getString("password"));
+                return user1;
+            });
+            return user;
+        } catch (IncorrectResultSizeDataAccessException e){
+            throw new UserNotFoundException(e);
+        }
     }
 
     @Override

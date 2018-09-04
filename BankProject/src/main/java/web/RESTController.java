@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import web.dao.BankDAO;
 import web.dao.BankDAOImpl;
 import web.exception.InsufficientFundsException;
+import web.exception.UserNotFoundException;
 import web.exception.UsernameTakenException;
 
 import java.util.logging.Logger;
@@ -29,45 +30,45 @@ public class RESTController {
                                            @RequestParam(value="first_name", required = false) String firstName,
                                            @RequestParam(value="last_name", required = false) String lastName,
                                            @RequestParam(value="phone_number", required = false) String phoneNumber) {
-            try {
-                bankDAO.addUser(new User(passport, password, firstName, lastName, phoneNumber));
-                return new ResponseEntity<>("Registration success.", HttpStatus.OK);
-            } catch (UsernameTakenException e){
-                return new ResponseEntity<>("Account with this passport number already exists.", HttpStatus.BAD_REQUEST);
-            } catch (DataAccessException e){
-                e.printStackTrace();
-                return new ResponseEntity<>("Registration failed, please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-//        }
+
+        if (password.length()<6){
+            return new ResponseEntity<>("Password should be at least 6 characters.", HttpStatus.BAD_REQUEST);
+        }
+        try {
+            bankDAO.addUser(new User(passport, password, firstName, lastName, phoneNumber));
+        } catch (UsernameTakenException e){
+            return new ResponseEntity<>("Account with this passport number already exists.", HttpStatus.BAD_REQUEST);
+        } catch (DataAccessException e){
+            e.printStackTrace();
+            return new ResponseEntity<>("Registration failed, please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>("Registration success.", HttpStatus.OK);
     }
 
     @RequestMapping(value="/deleteUser", method = POST)
     public ResponseEntity<String> deleteUser(@RequestParam(value="id") String id) {
         try {
             bankDAO.deleteUser(id);
-            return new ResponseEntity<>("Registration success.", HttpStatus.OK);
+            return new ResponseEntity<>("Removal successful.", HttpStatus.OK);
         } catch (DataAccessException e){
             e.printStackTrace();
-            return new ResponseEntity<>("Registration failed, please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Failed to remove account, please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-//        }
     }
 
     @RequestMapping(value="/login", method = POST)
     public ResponseEntity<String> login(@RequestParam(value="passport") String passport,
                                         @RequestParam(value="password") String password) {
 
-        log.info(String.format("Login attempt with credentials: %s %s", passport, password));
-
         try {
             User user = bankDAO.findUserByPassport(passport);
             if (user.getPassword().equals(password)){
                 return new ResponseEntity<>("Login success.", HttpStatus.OK);
             } else {
-                return new ResponseEntity<>("Incorrect password.", HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("Combination of username/password was not found.", HttpStatus.BAD_REQUEST);
             }
-        } catch (IncorrectResultSizeDataAccessException e){
-            return new ResponseEntity<>("Username not found.", HttpStatus.BAD_REQUEST);
+        } catch (UserNotFoundException e){
+            return new ResponseEntity<>("Combination of username/password was not found.", HttpStatus.BAD_REQUEST);
         }
     }
 
