@@ -4,19 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import web.User;
+import web.pojo.Operation;
+import web.pojo.User;
 import web.exception.InsufficientFundsException;
 import web.exception.UserNotFoundException;
 import web.exception.UsernameTakenException;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -27,6 +26,8 @@ public class BankDAOImpl implements BankDAO {
 
     private static  NamedParameterJdbcTemplate jdbcTemplate;
 
+    private static String SQL_SELECT_OPER_BY_PASSPORT = "SELECT * FROM Operations WHERE Sender_passport=:passport OR Receiver_passport=:passport";
+    private static String SQL_CHECK_BALANCE = "SELECT Balance FROM Users WHERE passport=:passport";
     @Autowired
     private void DBServiceImpl(DataSource dataSource) {
         jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -109,7 +110,8 @@ public class BankDAOImpl implements BankDAO {
     public double checkBalance(String passport) {
         Map<String,String> params = new HashMap<>();
         params.put("passport", passport);
-        return jdbcTemplate.queryForObject("SELECT Balance FROM Users WHERE passport=:passport", params, double.class);
+        Double balance = jdbcTemplate.queryForObject(SQL_CHECK_BALANCE, params, Double.class);
+        return balance;
     }
 
     @Override
@@ -119,5 +121,13 @@ public class BankDAOImpl implements BankDAO {
         withdrawFunds(senderPassport,amount);
         addFunds(receiverPassport,amount);
 
+    }
+
+    @Override
+    public List<Operation> getOperations(String passport) {
+        Map<String,String> params = new HashMap<>();
+        params.put("passport", passport);
+        List<Operation> resultList = jdbcTemplate.queryForList(SQL_SELECT_OPER_BY_PASSPORT, params, Operation.class);
+        return resultList;
     }
 }

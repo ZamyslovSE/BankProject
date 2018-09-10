@@ -1,10 +1,15 @@
 package web;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,7 +18,11 @@ import web.dao.BankDAOImpl;
 import web.exception.InsufficientFundsException;
 import web.exception.UserNotFoundException;
 import web.exception.UsernameTakenException;
+import web.pojo.Operation;
+import web.pojo.User;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -119,12 +128,49 @@ public class RESTController {
                                                 @RequestParam(value="amount") double amount){
         try {
             bankDAO.addFunds(senderPassport, amount);
-
             log.info(String.format("Transfer %s from account %s (bank %s) to account %s.", amount, senderPassport, senderBankId, targetPassport));
             return new ResponseEntity<>("Transfer success.", HttpStatus.OK);
         } catch (DataAccessException e) {
             e.printStackTrace();
-            return new ResponseEntity<>("Insufficient funds.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Error transfering funds.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(value="/getOperations", method = POST)
+    public ResponseEntity<String> getOperations( @RequestParam(value = "passport") String passport){
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return new ResponseEntity<String>(objectMapper.writeValueAsString(bankDAO.findUserByPassport(passport)), HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            log.info("Error parsing json.");
+            return new ResponseEntity<>("Error, try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (UserNotFoundException e) {
+            return new ResponseEntity<>("Could not load operations for this user.", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(value="/batchOperation", method = POST)
+    public ResponseEntity<String> loadBatchOperations( @RequestParam(value = "content") String content,
+                                                       @RequestHeader HttpHeaders headers){
+//        String jsonArray = "[{\"brand\":\"ford\"}, {\"brand\":\"Fiat\"}]";
+        if (content.startsWith("{") || content.startsWith("[")) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                List<Operation> operations = objectMapper.readValue(content, new TypeReference<List<Operation>>() {
+                });
+                //TODO db operation
+                return new ResponseEntity<>("Success.", HttpStatus.OK);
+            } catch (JsonMappingException|JsonParseException e){
+                log.info("Error parsing json");
+                return new ResponseEntity<>("Could not finish transaction.", HttpStatus.INTERNAL_SERVER_ERROR);
+            } catch (IOException e){
+                return new ResponseEntity<>("Could not finish transaction.", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else if (content.startsWith("<")){
+            //TODO parsing and db operation
+            return new ResponseEntity<>("Success.", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Incorrect format.", HttpStatus.BAD_REQUEST);
         }
     }
 }

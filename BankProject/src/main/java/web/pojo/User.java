@@ -1,4 +1,4 @@
-package web;
+package web.pojo;
 
 public class User {
     private long id;
