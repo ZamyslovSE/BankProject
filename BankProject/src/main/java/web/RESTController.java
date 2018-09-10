@@ -5,9 +5,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thoughtworks.xstream.XStream;
+import jdk.jfr.ContentType;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +35,7 @@ public class RESTController {
 
     private final BankDAO bankDAO = new BankDAOImpl();
     private static final Logger log = Logger.getLogger(RESTController.class.getName());
+    private static final String GENERIC_ERROR = "Error, please try again later";
 
     @RequestMapping(value="/register", method = POST)
     public ResponseEntity<String> register(@RequestParam(value="passport") String passport,
@@ -132,20 +136,43 @@ public class RESTController {
             return new ResponseEntity<>("Transfer success.", HttpStatus.OK);
         } catch (DataAccessException e) {
             e.printStackTrace();
-            return new ResponseEntity<>("Error transfering funds.", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @RequestMapping(value="/getOperations", method = POST)
-    public ResponseEntity<String> getOperations( @RequestParam(value = "passport") String passport){
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return new ResponseEntity<String>(objectMapper.writeValueAsString(bankDAO.findUserByPassport(passport)), HttpStatus.OK);
-        } catch (JsonProcessingException e) {
-            log.info("Error parsing json.");
-            return new ResponseEntity<>("Error, try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (UserNotFoundException e) {
-            return new ResponseEntity<>("Could not load operations for this user.", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<String> getOperations( @RequestParam(value = "passport") String passport,
+                                                 @RequestHeader HttpHeaders headers){
+        MediaType mime = headers.getContentType();
+        if (mime == null){
+            log.info("Missing header in request.");
+            return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        List<Operation> operations = bankDAO.getOperations(passport);
+
+        if (mime.equals(MediaType.APPLICATION_JSON) || mime.equals(MediaType.APPLICATION_JSON_UTF8)) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = objectMapper.writeValueAsString(operations);
+                return new ResponseEntity<>(json, HttpStatus.OK);
+            } catch (JsonProcessingException e) {
+                log.info("Error serializing json.");
+                e.clearLocation();
+                return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else if (mime.equals(MediaType.APPLICATION_XML) || mime.equals(MediaType.TEXT_XML)){
+            try{
+                XStream xstream = new XStream();
+                String xml = xstream.toXML(operations);
+                return new ResponseEntity<>(xml, HttpStatus.OK);
+            } catch (Exception e){
+                log.info("Error marshalling xml.");
+                e.printStackTrace();
+                return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -164,7 +191,7 @@ public class RESTController {
                 log.info("Error parsing json");
                 return new ResponseEntity<>("Could not finish transaction.", HttpStatus.INTERNAL_SERVER_ERROR);
             } catch (IOException e){
-                return new ResponseEntity<>("Could not finish transaction.", HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else if (content.startsWith("<")){
             //TODO parsing and db operation
