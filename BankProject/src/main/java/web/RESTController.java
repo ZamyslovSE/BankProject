@@ -6,7 +6,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.xstream.XStream;
-//import jdk.jfr.ContentType;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
@@ -25,6 +29,7 @@ import web.pojo.Operation;
 import web.pojo.User;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -122,14 +127,40 @@ public class RESTController {
     @RequestMapping(value="/transferFunds", method = POST)
     public ResponseEntity<String> transferFunds(@RequestParam(value="sender_passport") String senderPassport,
                                                 @RequestParam(value="target_passport") String targetPassport,
-                                                @RequestParam(value="amount") double amount){
+                                                @RequestParam(value="amount") double amount,
+                                                @RequestParam(value="bank_id") int bank_id){
         try {
             //Transfer funds somehow
-            log.info(String.format("Transfer %s from account %s to account %s.", amount, senderPassport, targetPassport));
-            bankDAO.transfer(senderPassport, targetPassport, amount);
-            return new ResponseEntity<>("Transfer success.", HttpStatus.OK);
+            switch(bank_id){
+                case 1:{
+                    String postUrl = "https://bankonline.azurewebsites.net/api/transfer/";
+                    CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+                    HttpPost post = new HttpPost(postUrl);
+                    StringEntity postingString = new StringEntity(String.format(" {\"amount\":%s , \"fromAccount\":\"%s\", \"toAccount\":\"%s\", \"currency\": \"RUB\", \"comment\": \"‾\\_(ツ)_/‾\"}",amount,senderPassport,targetPassport));
+                    post.setEntity(postingString);
+                    post.setHeader("Content-type", "application/json;charset=UTF-8");
+                    post.setHeader("X-API-Key", "hello");
+                    CloseableHttpResponse response = httpClient.execute(post);
+                    log.info("Success.");
+                    log.info(response.toString());
+                    return new ResponseEntity<>("Transfer success.", HttpStatus.OK);
+                }
+                case 8:{
+                    log.info(String.format("Transfer %s from account %s to account %s.", amount, senderPassport, targetPassport));
+                    bankDAO.transfer(senderPassport, targetPassport, amount);
+                    return new ResponseEntity<>("Transfer success.", HttpStatus.OK);
+                } default:{
+                    return new ResponseEntity<>("Could not transfer funds, unknown bank id.", HttpStatus.BAD_REQUEST);
+                }
+            }
         } catch (InsufficientFundsException e) {
             return new ResponseEntity<>("Could not transfer funds, not enough funds on sender account.", HttpStatus.BAD_REQUEST);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
