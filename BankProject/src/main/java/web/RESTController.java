@@ -136,10 +136,12 @@ public class RESTController {
                     String postUrl = "https://bankonline.azurewebsites.net/api/transfer/";
                     CloseableHttpClient httpClient = HttpClientBuilder.create().build();
                     HttpPost post = new HttpPost(postUrl);
-                    StringEntity postingString = new StringEntity(String.format(" {\"amount\":%s , \"fromAccount\":\"%s\", \"toAccount\":\"%s\", \"currency\": \"RUB\", \"comment\": \"‾\\_(ツ)_/‾\"}",amount,senderPassport,targetPassport));
+                    String jsonString = String.format(" {\"amount\":%s , \"fromAccount\":\"%s\", \"toAccount\":\"%s\", \"currency\": \"RUB\", \"comment\": \"‾\\_(ツ)_/‾\"}",amount,senderPassport,targetPassport);
+                    StringEntity postingString = new StringEntity(jsonString);
                     post.setEntity(postingString);
                     post.setHeader("Content-type", "application/json;charset=UTF-8");
                     post.setHeader("X-API-Key", "hello");
+                    log.info(jsonString);
                     CloseableHttpResponse response = httpClient.execute(post);
                     log.info("Success.");
                     log.info(response.toString());
