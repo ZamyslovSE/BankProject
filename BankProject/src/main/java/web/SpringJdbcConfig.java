@@ -26,7 +26,8 @@ public class SpringJdbcConfig {
 //        return dataSource;
         return DataSourceBuilder.create()
                 .driverClassName("com.mysql.jdbc.Driver")
-                .url("jdbc:mysql://ec2-18-220-114-39.us-east-2.compute.amazonaws.com:3306/BankDBTest?serverTimezone=UTC")
+//                .url("jdbc:mysql://ec2-18-223-2-140.us-east-2.compute.amazonaws.com:3306/BankDBTest?serverTimezone=UTC")
+                .url("jdbc:mysql://localhost:3306/BankDBTest?serverTimezone=UTC")
                 .username("bank_server")
                 .password("interiorlikesuicidewristred").build();
     }

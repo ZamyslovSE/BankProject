@@ -81,7 +81,7 @@ public class BankDAOImpl implements BankDAO {
     }
 
     @Override
-    public void withdrawFunds(String passport, double amount) throws InsufficientFundsException { //TODO refactor to BigDecimal
+    public double withdrawFunds(String passport, double amount) throws InsufficientFundsException { //TODO refactor to BigDecimal
         log.info(String.format("Withdrawing %s to %s.",amount,passport));
         double currentBalance = checkBalance(passport);
         if (currentBalance >= amount) {
@@ -90,8 +90,9 @@ public class BankDAOImpl implements BankDAO {
             params.put("passport", passport);
             params.put("balance", Double.toString(newBalance));
             jdbcTemplate.update("UPDATE Users SET balance=:balance WHERE passport=:passport", params);
+            return newBalance;
         } else {
-            throw new InsufficientFundsException("Not enough money on account.");
+            throw new InsufficientFundsException(String.format("Could not withdraw %s, not enough money on account.",amount));
         }
     }
 

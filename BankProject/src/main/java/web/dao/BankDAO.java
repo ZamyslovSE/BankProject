@@ -14,7 +14,7 @@ public interface BankDAO {
     User findUserByPassport(String passport) throws UserNotFoundException;
     void deleteUser(String id);
 
-    void withdrawFunds(String passport, double amount) throws InsufficientFundsException;
+    double withdrawFunds(String passport, double amount) throws InsufficientFundsException;
     void addFunds(String passport, double amount);
     void transfer(String senderPassport, String receiverPassport, double amount) throws InsufficientFundsException;
     double checkBalance(String passport);

@@ -6,7 +6,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thoughtworks.xstream.XStream;
-import jdk.jfr.ContentType;
+//import jdk.jfr.ContentType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import web.dao.BankDAO;
-import web.dao.BankDAOImpl;
 import web.exception.InsufficientFundsException;
 import web.exception.UserNotFoundException;
 import web.exception.UsernameTakenException;
@@ -33,9 +33,15 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 @RestController
 public class RESTController {
 
-    private final BankDAO bankDAO = new BankDAOImpl();
+    @Autowired
+    private final BankDAO bankDAO;
+//    private final BankDAO bankDAO = new BankDAOImpl();
     private static final Logger log = Logger.getLogger(RESTController.class.getName());
     private static final String GENERIC_ERROR = "Error, please try again later";
+
+    public RESTController(BankDAO bankDAO) {
+        this.bankDAO = bankDAO;
+    }
 
     @RequestMapping(value="/register", method = POST)
     public ResponseEntity<String> register(@RequestParam(value="passport") String passport,
@@ -86,11 +92,12 @@ public class RESTController {
     }
 
     @RequestMapping(value="/withdrawFunds", method = POST)
-    public ResponseEntity<String> withdrawFunds(@RequestParam(value="passport") String passport,
-                                        @RequestParam(value="amount") double amount){
+    public ResponseEntity<String> withdrawFunds(@RequestParam(value="bank_id") String bank_id,
+                                                @RequestParam(value="passport") String passport,
+                                                @RequestParam(value="amount") double amount){
             try {
                 bankDAO.withdrawFunds(passport, amount);
-                return new ResponseEntity<>("Withdrawal success.", HttpStatus.OK);
+                return new ResponseEntity<>(String.format("Withdrew %s successfully from account %s.",amount,passport), HttpStatus.OK);
 
             } catch (InsufficientFundsException e){
                 e.printStackTrace();
@@ -99,10 +106,11 @@ public class RESTController {
     }
 
     @RequestMapping(value="/addFunds", method = POST)
-    public ResponseEntity<String> addFunds(@RequestParam(value="passport") String passport,
-                                                @RequestParam(value="amount") double amount){
+    public ResponseEntity<String> addFunds(@RequestParam(value="bank_id") String bank_id,
+                                           @RequestParam(value="passport") String passport,
+                                           @RequestParam(value="amount") double amount){
             bankDAO.addFunds(passport, amount);
-            return new ResponseEntity<>("Addition success.", HttpStatus.OK);
+            return new ResponseEntity<>(String.format("Added %s successfully to account %s.",amount, passport), HttpStatus.OK);
     }
 
     @RequestMapping(value="/checkBalance", method = POST)
