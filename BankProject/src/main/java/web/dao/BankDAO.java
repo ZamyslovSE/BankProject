@@ -1,23 +1,18 @@
 package web.dao;
 
-import web.pojo.Operation;
+import web.pojo.Account;
+import web.pojo.TransactionRequest;
 import web.pojo.User;
 import web.exception.InsufficientFundsException;
 import web.exception.UserNotFoundException;
 import web.exception.UsernameTakenException;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface BankDAO {
 
     void addUser(User user) throws UsernameTakenException;
-    User findUserByPassport(String passport) throws UserNotFoundException;
-    void deleteUser(String id);
+    User findUserByUsername(String username) throws UserNotFoundException;
 
-    double withdrawFunds(String passport, double amount) throws InsufficientFundsException;
-    void addFunds(String passport, double amount);
-    void transfer(String senderPassport, String receiverPassport, double amount) throws InsufficientFundsException;
-    double checkBalance(String passport);
-
-    List<Operation> getOperations(String passport);
 }

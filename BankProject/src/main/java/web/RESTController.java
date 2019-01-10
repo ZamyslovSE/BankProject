@@ -5,240 +5,151 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.thoughtworks.xstream.XStream;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import web.dao.AccountDAO;
 import web.dao.BankDAO;
 import web.exception.InsufficientFundsException;
+import web.exception.UnauthorizedException;
 import web.exception.UserNotFoundException;
 import web.exception.UsernameTakenException;
-import web.pojo.Operation;
+import web.pojo.Account;
+import web.pojo.TransactionRequest;
 import web.pojo.User;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.MalformedURLException;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-@RestController
+    @SuppressWarnings("unused")
+@Controller
 public class RESTController {
 
-    @Autowired
     private final BankDAO bankDAO;
-//    private final BankDAO bankDAO = new BankDAOImpl();
+    private final AccountDAO accountDAO;
+
+    private final ObjectMapper objectMapper;
+//    private final SessionService sessionService;
+
     private static final Logger log = Logger.getLogger(RESTController.class.getName());
     private static final String GENERIC_ERROR = "Error, please try again later";
+    private static final String RESOURCE_FOLDER = "resources";
 
-    public RESTController(BankDAO bankDAO) {
+    @Autowired
+    public RESTController(BankDAO bankDAO, AccountDAO accountDAO) {
         this.bankDAO = bankDAO;
+        this.accountDAO = accountDAO;
+        objectMapper = new ObjectMapper();
+//        sessionService = new SessionService();
     }
 
-    @RequestMapping(value="/register", method = POST)
-    public ResponseEntity<String> register(@RequestParam(value="passport") String passport,
-                                           @RequestParam(value="password") String password,
-                                           @RequestParam(value="first_name", required = false) String firstName,
-                                           @RequestParam(value="last_name", required = false) String lastName,
-                                           @RequestParam(value="phone_number", required = false) String phoneNumber) {
+    @GetMapping("/login")
+    public /*void*/ String login(HttpServletResponse response) throws IOException {
+        return "/login";
+    }
 
-        if (password.length()<6){
-            return new ResponseEntity<>("Password should be at least 6 characters.", HttpStatus.BAD_REQUEST);
-        }
+    @GetMapping("/")
+    public /*void*/String index(HttpServletResponse response) throws IOException {
+        return "redirect:/home";
+    }
+
+    @GetMapping("/home")
+    public /*void*/String home(HttpServletResponse response) throws IOException {
+        return "/home";
+    }
+
+    @GetMapping("/client")
+    public /*void*/String client(HttpServletResponse response) throws IOException {
+        return "/client";
+    }
+
+    @RequestMapping(value = "/register", method = POST)
+    public ResponseEntity<String> register(@RequestBody String userJson) {
         try {
-            bankDAO.addUser(new User(passport, password, firstName, lastName, phoneNumber));
-        } catch (UsernameTakenException e){
-            return new ResponseEntity<>("Account with this passport number already exists.", HttpStatus.BAD_REQUEST);
-        } catch (DataAccessException e){
-            e.printStackTrace();
-            return new ResponseEntity<>("Registration failed, please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<>("Registration success.", HttpStatus.OK);
-    }
-
-    @RequestMapping(value="/deleteUser", method = POST)
-    public ResponseEntity<String> deleteUser(@RequestParam(value="id") String id) {
-        try {
-            bankDAO.deleteUser(id);
-            return new ResponseEntity<>("Removal successful.", HttpStatus.OK);
-        } catch (DataAccessException e){
-            e.printStackTrace();
-            return new ResponseEntity<>("Failed to remove account, please try again later.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @RequestMapping(value="/login", method = POST)
-    public ResponseEntity<String> login(@RequestParam(value="passport") String passport,
-                                        @RequestParam(value="password") String password) {
-
-        try {
-            User user = bankDAO.findUserByPassport(passport);
-            if (user.getPassword().equals(password)){
-                return new ResponseEntity<>("Login success.", HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>("Combination of username/password was not found.", HttpStatus.BAD_REQUEST);
-            }
-        } catch (UserNotFoundException e){
-            return new ResponseEntity<>("Combination of username/password was not found.", HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @RequestMapping(value="/withdrawFunds", method = POST)
-    public ResponseEntity<String> withdrawFunds(@RequestParam(value="bank_id") String bank_id,
-                                                @RequestParam(value="passport") String passport,
-                                                @RequestParam(value="amount") double amount){
-            try {
-                bankDAO.withdrawFunds(passport, amount);
-                return new ResponseEntity<>(String.format("Withdrew %s successfully from account %s.",amount,passport), HttpStatus.OK);
-
-            } catch (InsufficientFundsException e){
-                e.printStackTrace();
-                return new ResponseEntity<>("Insufficient funds.", HttpStatus.BAD_REQUEST);
-            }
-    }
-
-    @RequestMapping(value="/addFunds", method = POST)
-    public ResponseEntity<String> addFunds(@RequestParam(value="bank_id") String bank_id,
-                                           @RequestParam(value="passport") String passport,
-                                           @RequestParam(value="amount") double amount){
-            bankDAO.addFunds(passport, amount);
-            return new ResponseEntity<>(String.format("Added %s successfully to account %s.",amount, passport), HttpStatus.OK);
-    }
-
-    @RequestMapping(value="/checkBalance", method = POST)
-    public ResponseEntity<Double> checkBalance(@RequestParam(value="passport") String passport){
-        Double balance = bankDAO.checkBalance(passport);
-        return new ResponseEntity<>(balance, HttpStatus.OK);
-    }
-
-    @RequestMapping(value="/transferFunds", method = POST)
-    public ResponseEntity<String> transferFunds(@RequestParam(value="sender_passport") String senderPassport,
-                                                @RequestParam(value="target_passport") String targetPassport,
-                                                @RequestParam(value="amount") double amount,
-                                                @RequestParam(value="bank_id") int bank_id){
-        try {
-            //Transfer funds somehow
-            switch(bank_id){
-                case 1:{
-                    String postUrl = "https://bankonline.azurewebsites.net/api/transfer/";
-                    CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-                    HttpPost post = new HttpPost(postUrl);
-                    String jsonString = String.format(" {\"amount\":%s , \"fromAccount\":\"%s\", \"toAccount\":\"%s\", \"currency\": \"RUB\", \"comment\": \"‾\\_(ツ)_/‾\"}",amount,senderPassport,targetPassport);
-                    StringEntity postingString = new StringEntity(jsonString);
-                    post.setEntity(postingString);
-                    post.setHeader("Content-type", "application/json;charset=UTF-8");
-                    post.setHeader("X-API-Key", "hello");
-                    log.info(jsonString);
-                    CloseableHttpResponse response = httpClient.execute(post);
-                    log.info("Success.");
-                    log.info(response.toString());
-                    return new ResponseEntity<>("Transfer success.", HttpStatus.OK);
-                }
-                case 8:{
-                    log.info(String.format("Transfer %s from account %s to account %s.", amount, senderPassport, targetPassport));
-                    bankDAO.transfer(senderPassport, targetPassport, amount);
-                    return new ResponseEntity<>("Transfer success.", HttpStatus.OK);
-                } default:{
-                    return new ResponseEntity<>("Could not transfer funds, unknown bank id.", HttpStatus.BAD_REQUEST);
-                }
-            }
-        } catch (InsufficientFundsException e) {
-            return new ResponseEntity<>("Could not transfer funds, not enough funds on sender account.", HttpStatus.BAD_REQUEST);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+            User user = objectMapper.readValue(userJson, User.class);
+            bankDAO.addUser(user);
+            return new ResponseEntity<>("Registration success.", HttpStatus.OK);
         } catch (IOException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(String.format("%s %s", e.getClass().getName(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (UsernameTakenException e) {
+            return new ResponseEntity<>(String.format("%s %s", e.getClass().getName(), e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @RequestMapping(value="/receiveFunds", method = POST)
-    public ResponseEntity<String> receiveFunds( @RequestParam(value="sender_passport") String senderPassport,
-                                                @RequestParam(value="sender_bank_id") String senderBankId,
-                                                @RequestParam(value="target_passport") String targetPassport,
-                                                @RequestParam(value="amount") double amount){
+    @RequestMapping(value = "/auth", method = POST)
+    @ResponseBody
+    public String auth(HttpServletRequest request, HttpServletResponse response, @RequestBody String userJson) throws Exception {
+        String login = null;
+        String password = null;
         try {
-            bankDAO.addFunds(senderPassport, amount);
-            log.info(String.format("Transfer %s from account %s (bank %s) to account %s.", amount, senderPassport, senderBankId, targetPassport));
-            return new ResponseEntity<>("Transfer success.", HttpStatus.OK);
-        } catch (DataAccessException e) {
+            ObjectNode objectNode = objectMapper.readValue(userJson, ObjectNode.class);
+            login = objectNode.get("login").textValue();
+            password = objectNode.get("password").textValue();
+            log.info(String.format("Logging in U:%s P:%s", login, password));
+            User user = bankDAO.findUserByUsername(login);
+
+            if (login == null || password == null) {
+                throw new Exception("Login/Password cant be empty.");
+            }
+
+            if (user.getPassword().equals(password)) {
+                return SessionService.getInstance().getSessionId(user.getId());
+            } else {
+                throw new Exception("Combination of username/password was not found.");
+            }
+        } catch (UserNotFoundException e) {
+            log.info(String.format("Could not find user with credentials U:%s P:%s", login, password));
+            throw e;
+        }
+    }
+
+    @RequestMapping(value="/logout", method = {POST,GET})
+    public String logout() {
+        return "redirect:/home";
+    }
+
+    @RequestMapping(value="/accounts", method = POST)
+    @ResponseBody
+    public String accounts(HttpServletRequest request, HttpServletResponse response, @RequestBody String json) {
+        String token;
+        try {
+            if (!loggedIn(request)){
+                throw new UnauthorizedException("Not authorized");
+            }
+
+            ObjectNode objectNode = objectMapper.readValue(json, ObjectNode.class);
+            token = objectNode.get("token_bank").textValue();
+            if (token==null){
+                throw new IllegalArgumentException("No client id in request");
+            }
+            List<Account> accountList = accountDAO.getAccounts(SessionService.getInstance().getUserSession(token).getClientId());
+            String result = objectMapper.writeValueAsString(accountList);
+            response.setStatus(HttpServletResponse.SC_ACCEPTED);
+            return result;
+        } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return null;
         }
     }
 
-    @RequestMapping(value="/getOperations", method = POST)
-    public ResponseEntity<String> getOperations( @RequestParam(value = "passport") String passport,
-                                                 @RequestHeader HttpHeaders headers){
-        MediaType mime = headers.getContentType();
-        if (mime == null){
-            log.info("Missing header in request.");
-            return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        List<Operation> operations = bankDAO.getOperations(passport);
-
-        if (mime.equals(MediaType.APPLICATION_JSON) || mime.equals(MediaType.APPLICATION_JSON_UTF8)) {
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                String json = objectMapper.writeValueAsString(operations);
-                return new ResponseEntity<>(json, HttpStatus.OK);
-            } catch (JsonProcessingException e) {
-                log.info("Error serializing json.");
-                e.clearLocation();
-                return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } else if (mime.equals(MediaType.APPLICATION_XML) || mime.equals(MediaType.TEXT_XML)){
-            try{
-                XStream xstream = new XStream();
-                String xml = xstream.toXML(operations);
-                return new ResponseEntity<>(xml, HttpStatus.OK);
-            } catch (Exception e){
-                log.info("Error marshalling xml.");
-                e.printStackTrace();
-                return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } else {
-            return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @RequestMapping(value="/batchOperation", method = POST)
-    public ResponseEntity<String> loadBatchOperations( @RequestParam(value = "content") String content,
-                                                       @RequestHeader HttpHeaders headers){
-//        String jsonArray = "[{\"brand\":\"ford\"}, {\"brand\":\"Fiat\"}]";
-        if (content.startsWith("{") || content.startsWith("[")) {
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                List<Operation> operations = objectMapper.readValue(content, new TypeReference<List<Operation>>() {
-                });
-                //TODO db operation
-                return new ResponseEntity<>("Success.", HttpStatus.OK);
-            } catch (JsonMappingException|JsonParseException e){
-                log.info("Error parsing json");
-                return new ResponseEntity<>("Could not finish transaction.", HttpStatus.INTERNAL_SERVER_ERROR);
-            } catch (IOException e){
-                return new ResponseEntity<>(GENERIC_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } else if (content.startsWith("<")){
-            //TODO parsing and db operation
-            return new ResponseEntity<>("Success.", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Incorrect format.", HttpStatus.BAD_REQUEST);
-        }
+    public boolean loggedIn(HttpServletRequest request){
+//        request.getHeader("");
+        return true;
     }
 }

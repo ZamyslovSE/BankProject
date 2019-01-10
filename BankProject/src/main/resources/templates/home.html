@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<title>RKB Home page</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<style>
+.w3-theme {color:#fff !important;background-color:#4CAF50 !important}
+.w3-btn {background-color:#4CAF50;margin-bottom:4px}
+.w3-code{border-left:4px solid #4CAF50}
+.myMenu {margin-bottom:150px}
+</style>
+<body>
+
+<script>
+    function authenticate() {
+        console.log("start auth")
+
+        var params = {
+            login: document.querySelector('#login').value,
+            password: document.querySelector('#password').value
+        }
+        const http = new XMLHttpRequest()
+        http.open("POST", "auth")
+        http.setRequestHeader('Content-type', 'application/json')
+        http.send(JSON.stringify(params))
+        http.onerror = function() {
+            if (this.status == 404) {
+                <!--document.getElementById('404_msg').style.display='block'-->
+                throw new Error("auth" + ' replied 404');
+                console.log("response" + http.responseText)
+            } else {
+                console.log("else fail auth")
+            }
+        }
+        http.onload = function() {
+            if (this.status == 200) {
+                console.log("success auth");
+                var cookie_rnd = http.responseText;
+                setCookie("token_bank", cookie_rnd, 1);
+                console.log("set cookie " + cookie_rnd);
+                window.location.href="client";
+            }
+        }
+        console.log("end auth")
+    }
+
+    function setCookie(cname, cvalue, exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays*24*60*60*1000));
+      var expires = "expires="+ d.toUTCString();
+      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+
+    function getCookie(cname) {
+      var name = cname + "=";
+      var decodedCookie = decodeURIComponent(document.cookie);
+      var ca = decodedCookie.split(';');
+      for(var i = 0; i <ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+</script>
+
+<!-- Top -->
+<div class="w3-top">
+    <div class="w3-row w3-white w3-padding">
+        <div class="w3-half w3-margin-top w3-wide w3-hide-medium w3-hide-small"><div class="w3-right">IGRAEMSYA SO SHRIFTAMI</div></div>
+    </div>
+    <div class="w3-bar w3-theme w3-large" style="z-index:4;">
+        <a class="w3-bar-item w3-button w3-left w3-hide-large w3-hover-white w3-large w3-theme w3-padding-16" href="javascript:void(0)" onclick="w3_open()">☰</a>
+
+        <!-- Link to client  -->
+        <a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-white w3-padding-16" onclick="document.getElementById('id01').style.display='block'">Личный кабинет</a>
+
+        <a class="w3-bar-item w3-button w3-hide-medium w3-hover-white w3-padding-16" href="javascript:void(0)" onclick="w3_show_nav('menuRef')">Тарифы</a>
+        <a class="w3-bar-item w3-button w3-hide-medium w3-hover-white w3-padding-16" href="javascript:void(0)" onclick="w3_show_nav('menuRef')">Контакты</a>
+    </div>
+</div>
+
+<!-- Login -->
+<div id="id01" class="w3-modal">
+    <div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:600px">
+
+        <div class="w3-center"><br>
+            <span onclick="document.getElementById('id01').style.display='none'" class="w3-button w3-xlarge w3-transparent w3-display-topright" title="Close Modal">×</span>
+        </div>
+
+        <div id="login_msg" style="display:none">
+            Invalid username and password.
+        </div>
+        <div id="404_msg" style="display:none">
+            404 error.
+        </div>
+        <div id="logout_msg" style="display:none">
+            You have been logged out.
+        </div>
+
+        <div class="w3-container">
+            <div class="w3-section">
+                <label><b>Username</b></label>
+                <input id="login" class="w3-input w3-border w3-margin-bottom" type="text" placeholder="Enter Username" name="login" required>
+                <label><b>Password</b></label>
+                <input id="password" class="w3-input w3-border" type="password" placeholder="Enter Password" name="password" required>
+                <button class="w3-button w3-block w3-green w3-section w3-padding" onclick="return authenticate()">Login</button>
+                <input class="w3-check w3-margin-top" type="checkbox" checked="checked"> Remember me
+            </div>
+        </div>
+
+        <div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+            <button onclick="document.getElementById('id01').style.display='none'" type="button" class="w3-button w3-red">Cancel</button>
+            <span class="w3-right w3-padding w3-hide-small">Forgot <a href="#">password?</a></span>
+        </div>
+
+    </div>
+</div>
+
+<!-- Main content -->
+<div class="w3-main w3-container" style="margin-top:117px;">
+    <h1>Это главная страница, несите к нам ваши деньги.</h1>
+    <button onclick="return test()">Test</button>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<title>W3.CSS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<style>
+.w3-theme {color:#fff !important;background-color:#4CAF50 !important}
+.w3-btn {background-color:#4CAF50;margin-bottom:4px}
+.w3-code{border-left:4px solid #4CAF50}
+.myMenu {margin-bottom:150px}
+</style>
+<head>
+    <script type="text/javascript" th:src="@{/js/scripts.js}"></script>
+</head>
+<body>
+
+<!-- Top -->
+<div class="w3-top">
+    <div class="w3-row w3-white w3-padding">
+        <div class="w3-half" style="margin:4px 0 6px 0"><a href='https://www.w3schools.com'><img src='/images/w3schools.png' alt='W3Schools.com'></a></div>
+        <div class="w3-half w3-margin-top w3-wide w3-hide-medium w3-hide-small"><div class="w3-right">IGRAEMSYA SO SHRIFTAMI</div></div>
+    </div>
+    <div class="w3-bar w3-theme w3-large" style="z-index:4;">
+        <a class="w3-bar-item w3-button w3-left w3-hide-large w3-hover-white w3-large w3-theme w3-padding-16" href="javascript:void(0)" onclick="w3_open()">☰</a>
+        <a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-white w3-padding-16" href="/logout">Выйти</a>
+        <a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-white w3-padding-16" onclick="testAlert()">Тест</a>
+        <a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-white w3-padding-16" href="/logout">Выйти</a>
+        <a class="w3-bar-item w3-right w3-padding-16">Имя Фамилия Отчество</a>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="accountModal" class="w3-modal">
+    <div class="w3-modal-content w3-card-4 w3-animate-zoom ">
+        <header class="w3-container w3-green">
+            <span onclick="document.getElementById('accountModal').style.display='none'"
+                class="w3-button w3-green w3-xlarge w3-display-topright">&times;</span>
+            <h2>Операции</h2>
+        </header>
+
+        <div class="w3-bar w3-border-bottom ">
+            <button class="tablink w3-bar-item w3-button" onclick="openCity(event, 'transferTab')">Перевод</button>
+            <button class="tablink w3-bar-item w3-button" onclick="openCity(event, 'addTab')">Пополнение</button>
+            <button class="tablink w3-bar-item w3-button" onclick="openCity(event, 'utilTab')">Оплата услуг</button>
+        </div>
+
+        <div id="transferTab" class="w3-container city w3-margin">
+            <label>Номер счета отправителя</label>
+            <div id="selectDiv"></div>
+            <label>Номер счета получателя</label>
+            <input class="w3-input w3-border" type="text" placeholder="123-456">
+            <label>Сумма</label>
+            <input class="w3-input w3-border" type="text" placeholder="0,0">
+            <!--<div class="w3-cell-row">-->
+                <!--<button class="w3-button w3-green w3-border w3-hover-light-green">Отмена</button>-->
+                <!--<button class="w3-button w3-green w3-border w3-hover-light-green">Готово</button>-->
+            <!--</div>-->
+        </div>
+
+        <div id="addTab" class="w3-container city w3-margin">
+            <label>Номер счета</label>
+            <div id="selectDiv1"></div>
+            <!--<label>Номер счета получателя</label>-->
+            <!--<input class="w3-input w3-border" type="text" placeholder="123-456">-->
+            <label>Сумма</label>
+            <input class="w3-input w3-border" type="text" placeholder="0,0">
+        </div>
+
+        <div id="utilTab" class="w3-container city">
+            <h1>Coming soon</h1>
+            <p>Пока не доделано.</p><br>
+        </div>
+
+        <div class="w3-container w3-light-grey w3-padding">
+            <button class="w3-button w3-left w3-white w3-border"
+                    onclick="document.getElementById('accountModal').style.display='none'">Close</button>
+            <button class="w3-button w3-right w3-white w3-border"
+                    onclick="processOperation()">Next</button>
+        </div>
+    </div>
+</div>
+
+<!-- Main content -->
+<div class="w3-main w3-container" style="margin-top:117px;">
+    <h1>Личный кабинет</h1>
+    <div id="tableDiv" style="margin: 25px"></div>
+    <div class="w3-cell-row" style="margin: 25px">
+        <button class="w3-button w3-green w3-border w3-hover-light-green" onclick="document.getElementById('accountModal').style.display='block'">Операции</button>
+        <button class="w3-button w3-green w3-border w3-hover-light-green">Переводы</button>
+    </div>
+</div>
+
+<script>
+    document.getElementsByClassName("tablink")[0].click();
+    window.onload=render;
+</script>
+
+</body>
+</html>

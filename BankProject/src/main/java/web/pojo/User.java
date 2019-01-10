@@ -1,15 +1,12 @@
 package web.pojo;
 
 public class User {
-    private long id;
-    private String passport;
+    private String id;
+    private String login;
     private String password;
-    String firstName;
-    String lastName;
-    String phoneNumber;
 
     public User(String login, String passport, String password) {
-        this.passport=passport;
+        this.login =passport;
         this.password=password;
     }
 
@@ -17,33 +14,25 @@ public class User {
     }
 
     public User(String login, String password) {
-        this.passport=null;
+        this.login =login;
         this.password=password;
     }
 
-    public User(String passport, String password, String firstName, String lastName, String phoneNumber) {
-        this.passport=passport;
-        this.password=password;
-        this.firstName=firstName;
-        this.lastName=lastName;
-        this.phoneNumber=phoneNumber;
-    }
-
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
 
-    public String getPassport() {
-        return passport;
+    public String getLogin() {
+        return login;
     }
 
-    public void setPassport(String passport) {
-        this.passport = passport;
+    public void setLogin(String login) {
+        this.login = login;
     }
 
     public String getPassword() {
@@ -54,15 +43,4 @@ public class User {
         this.password = password;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
 }
