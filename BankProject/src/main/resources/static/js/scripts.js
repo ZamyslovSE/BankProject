@@ -1,5 +1,18 @@
 var accounts;
 
+function logout() {
+    var params = {
+        token_bank: getCookie("token_bank")
+    }
+    const http = new XMLHttpRequest();
+    http.open('POST', '/logout');
+    http.setRequestHeader('Content-type', 'application/json');
+    http.send(JSON.stringify(params));
+    // var result = null;
+    http.onload = function() {
+        window.location.href="home";
+    }
+}
 
 function testAlert(){
     alert("Hello! I am an alert box!!");
@@ -77,6 +90,12 @@ function drawDDList(data, id){
     select.setAttribute("class", "w3-select w3-border");
     select.setAttribute("id", "selectAccount");
 
+    var defaultOption = document.createElement("option");
+    defaultOption.appendChild(document.createTextNode("Выберите счет"));
+    defaultOption.setAttribute("selected","selected");
+    defaultOption.setAttribute("disabled","disabled");
+    select.appendChild(defaultOption);
+
     // creating options
     for (var i = 0; i < data.length; i++) {
         var option = document.createElement("option");
@@ -109,26 +128,4 @@ function openCity(evt, cityName) {
 function processOperation(){
     document.getElementById('accountModal').style.display='none';
     alert("Успешно (пока ничего не происходит)")
-}
-function setCookie(cname, cvalue, exdays) {
-    var d = new Date();
-    d.setTime(d.getTime() + (exdays*24*60*60*1000));
-    var expires = "expires="+ d.toUTCString();
-    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-}
-
-function getCookie(cname) {
-    var name = cname + "=";
-    var decodedCookie = decodeURIComponent(document.cookie);
-    var ca = decodedCookie.split(';');
-    for (var i = 0; i <ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-        }
-    }
-    return "";
 }

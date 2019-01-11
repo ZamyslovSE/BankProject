@@ -4,19 +4,14 @@ public class User {
     private String id;
     private String login;
     private String password;
-
-    public User(String login, String passport, String password) {
-        this.login =passport;
-        this.password=password;
-    }
+    private String passport;
+    private String firstName;
+    private String secondName;
+    private String lastName;
 
     public User() {
     }
 
-    public User(String login, String password) {
-        this.login =login;
-        this.password=password;
-    }
 
     public String getId() {
         return id;
@@ -25,7 +20,6 @@ public class User {
     public void setId(String id) {
         this.id = id;
     }
-
 
     public String getLogin() {
         return login;
@@ -43,4 +37,35 @@ public class User {
         this.password = password;
     }
 
+    public String getPassport() {
+        return passport;
+    }
+
+    public void setPassport(String passport) {
+        this.passport = passport;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getSecondName() {
+        return secondName;
+    }
+
+    public void setSecondName(String secondName) {
+        this.secondName = secondName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 }

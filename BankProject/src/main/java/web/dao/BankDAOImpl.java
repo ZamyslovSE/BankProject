@@ -42,7 +42,7 @@ public class BankDAOImpl implements BankDAO {
         params.put("password",user.getPassword());
         params.put("login",user.getLogin());
         try {
-            jdbcTemplate.update("INSERT INTO Users(Passport, Password) VALUES (:login, :password)", params);
+            jdbcTemplate.update("INSERT INTO Users(login, password, passport, firstName, secondName, lastName) VALUES (:login, :password, :passport, :firstName, :secondName, :lastName)", params);
         } catch (DuplicateKeyException e){
 //            e.printStackTrace();
             throw new UsernameTakenException("Passport number taken",e);

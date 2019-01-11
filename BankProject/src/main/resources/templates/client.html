@@ -12,6 +12,7 @@
 </style>
 <head>
     <script type="text/javascript" th:src="@{/js/scripts.js}"></script>
+    <script type="text/javascript" th:src="@{/js/token_cookie.js}"></script>
 </head>
 <body>
 
@@ -22,10 +23,9 @@
         <div class="w3-half w3-margin-top w3-wide w3-hide-medium w3-hide-small"><div class="w3-right">IGRAEMSYA SO SHRIFTAMI</div></div>
     </div>
     <div class="w3-bar w3-theme w3-large" style="z-index:4;">
-        <a class="w3-bar-item w3-button w3-left w3-hide-large w3-hover-white w3-large w3-theme w3-padding-16" href="javascript:void(0)" onclick="w3_open()">☰</a>
-        <a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-white w3-padding-16" href="/logout">Выйти</a>
-        <a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-white w3-padding-16" onclick="testAlert()">Тест</a>
-        <a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-white w3-padding-16" href="/logout">Выйти</a>
+        <a class="w3-bar-item w3-button w3-hover-white w3-padding-16" onclick="logout()">Выйти</a>
+        <a class="w3-bar-item w3-button w3-hover-white w3-padding-16" onclick="testAlert()">Тест</a>
+        <a class="w3-bar-item w3-button w3-hover-white w3-padding-16" onclick="logout()">Выйти</a>
         <a class="w3-bar-item w3-right w3-padding-16">Имя Фамилия Отчество</a>
     </div>
 </div>
@@ -49,20 +49,14 @@
             <label>Номер счета отправителя</label>
             <div id="selectDiv"></div>
             <label>Номер счета получателя</label>
-            <input class="w3-input w3-border" type="text" placeholder="123-456">
+            <input class="w3-input w3-border" type="text" placeholder="1234-4567">
             <label>Сумма</label>
             <input class="w3-input w3-border" type="text" placeholder="0,0">
-            <!--<div class="w3-cell-row">-->
-                <!--<button class="w3-button w3-green w3-border w3-hover-light-green">Отмена</button>-->
-                <!--<button class="w3-button w3-green w3-border w3-hover-light-green">Готово</button>-->
-            <!--</div>-->
         </div>
 
         <div id="addTab" class="w3-container city w3-margin">
             <label>Номер счета</label>
             <div id="selectDiv1"></div>
-            <!--<label>Номер счета получателя</label>-->
-            <!--<input class="w3-input w3-border" type="text" placeholder="123-456">-->
             <label>Сумма</label>
             <input class="w3-input w3-border" type="text" placeholder="0,0">
         </div>

@@ -9,64 +9,12 @@
 .w3-code{border-left:4px solid #4CAF50}
 .myMenu {margin-bottom:150px}
 </style>
+
+<head>
+    <script type="text/javascript" th:src="@{/js/home.js}"></script>
+    <script type="text/javascript" th:src="@{/js/token_cookie.js}"></script>
+</head>
 <body>
-
-<script>
-    function authenticate() {
-        console.log("start auth")
-
-        var params = {
-            login: document.querySelector('#login').value,
-            password: document.querySelector('#password').value
-        }
-        const http = new XMLHttpRequest()
-        http.open("POST", "auth")
-        http.setRequestHeader('Content-type', 'application/json')
-        http.send(JSON.stringify(params))
-        http.onerror = function() {
-            if (this.status == 404) {
-                <!--document.getElementById('404_msg').style.display='block'-->
-                throw new Error("auth" + ' replied 404');
-                console.log("response" + http.responseText)
-            } else {
-                console.log("else fail auth")
-            }
-        }
-        http.onload = function() {
-            if (this.status == 200) {
-                console.log("success auth");
-                var cookie_rnd = http.responseText;
-                setCookie("token_bank", cookie_rnd, 1);
-                console.log("set cookie " + cookie_rnd);
-                window.location.href="client";
-            }
-        }
-        console.log("end auth")
-    }
-
-    function setCookie(cname, cvalue, exdays) {
-      var d = new Date();
-      d.setTime(d.getTime() + (exdays*24*60*60*1000));
-      var expires = "expires="+ d.toUTCString();
-      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-    }
-
-    function getCookie(cname) {
-      var name = cname + "=";
-      var decodedCookie = decodeURIComponent(document.cookie);
-      var ca = decodedCookie.split(';');
-      for(var i = 0; i <ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') {
-          c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-          return c.substring(name.length, c.length);
-        }
-      }
-      return "";
-    }
-</script>
 
 <!-- Top -->
 <div class="w3-top">
@@ -74,22 +22,22 @@
         <div class="w3-half w3-margin-top w3-wide w3-hide-medium w3-hide-small"><div class="w3-right">IGRAEMSYA SO SHRIFTAMI</div></div>
     </div>
     <div class="w3-bar w3-theme w3-large" style="z-index:4;">
-        <a class="w3-bar-item w3-button w3-left w3-hide-large w3-hover-white w3-large w3-theme w3-padding-16" href="javascript:void(0)" onclick="w3_open()">☰</a>
 
         <!-- Link to client  -->
-        <a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-white w3-padding-16" onclick="document.getElementById('id01').style.display='block'">Личный кабинет</a>
+        <!--<a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-white w3-padding-16" onclick="document.getElementById('id01').style.display='block'">Личный кабинет</a>-->
 
-        <a class="w3-bar-item w3-button w3-hide-medium w3-hover-white w3-padding-16" href="javascript:void(0)" onclick="w3_show_nav('menuRef')">Тарифы</a>
-        <a class="w3-bar-item w3-button w3-hide-medium w3-hover-white w3-padding-16" href="javascript:void(0)" onclick="w3_show_nav('menuRef')">Контакты</a>
+        <a class="w3-bar-item w3-button w3-hover-white w3-padding-16" onclick="chooseTab('indexDiv')">Главная</a>
+        <a class="w3-bar-item w3-button w3-hover-white w3-padding-16" onclick="chooseTab('tariffDiv')">Тарифы</a>
+        <a class="w3-bar-item w3-button w3-right w3-hover-white w3-padding-16" href="javascript:void(0)" onclick="document.getElementById('loginForm').style.display='block'">Личный кабинет</a>
     </div>
 </div>
 
 <!-- Login -->
-<div id="id01" class="w3-modal">
+<div id="loginForm" class="w3-modal">
     <div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:600px">
 
         <div class="w3-center"><br>
-            <span onclick="document.getElementById('id01').style.display='none'" class="w3-button w3-xlarge w3-transparent w3-display-topright" title="Close Modal">×</span>
+            <span onclick="document.getElementById('loginForm').style.display='none'" class="w3-button w3-xlarge w3-transparent w3-display-topright" title="Close Modal">×</span>
         </div>
 
         <div id="login_msg" style="display:none">
@@ -114,17 +62,71 @@
         </div>
 
         <div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
-            <button onclick="document.getElementById('id01').style.display='none'" type="button" class="w3-button w3-red">Cancel</button>
+            <button onclick="document.getElementById('loginForm').style.display='none'" type="button" class="w3-button w3-red">Cancel</button>
             <span class="w3-right w3-padding w3-hide-small">Forgot <a href="#">password?</a></span>
         </div>
 
     </div>
 </div>
 
-<!-- Main content -->
-<div class="w3-main w3-container" style="margin-top:117px;">
-    <h1>Это главная страница, несите к нам ваши деньги.</h1>
-    <button onclick="return test()">Test</button>
+<!-- Main content index -->
+<div id="indexDiv" class="w3-main w3-container pageTab" style="margin-top:117px;">
+    <h1>Главная страница</h1>
+    <div>
+        <p><img th:src="@{/images/promotion.jpg}" style="width:25%; word-break: normal" align="left" />Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam eu magna risus. Suspendisse condimentum porta velit et convallis. Maecenas quis dolor nec ipsum hendrerit suscipit. Proin vel mollis sapien. Pellentesque id vulputate dolor. Sed varius leo vel nulla vehicula, nec placerat magna dictum. Phasellus imperdiet cursus leo in rutrum. Mauris ultrices sem convallis auctor tincidunt. Nullam bibendum purus eget lacus molestie, id dapibus nulla mattis. Aenean vel libero vitae eros accumsan ultrices. Interdum et malesuada fames ac ante ipsum primis in faucibus. In posuere mattis lectus, cursus posuere dolor mollis vitae.</p>
+        <p>Morbi in egestas metus, nec pharetra dui. Nunc at lorem blandit turpis feugiat consequat ac eget leo. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Praesent eget dapibus libero, ac bibendum quam. Sed a purus sit amet enim viverra aliquet sit amet eget ligula. Aenean consequat varius convallis. Sed vitae ipsum est. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc varius odio sed condimentum sollicitudin. In hac habitasse platea dictumst. Sed tempus sed diam imperdiet imperdiet. Etiam eu libero eget mauris iaculis molestie. Integer dapibus tristique accumsan.</p>
+        <p>Donec id ligula ex. Etiam ipsum leo, sodales quis sem a, malesuada mattis massa. Nam dignissim felis quis nibh sodales elementum. Morbi vel tellus eu est tempus dignissim at a massa. Nulla tempus mi ut dignissim interdum. Sed gravida efficitur tellus. Vivamus sed accumsan turpis. Nam at nulla et orci efficitur scelerisque in sit amet neque. In nec lobortis justo.</p>
+        <p>Mauris condimentum vulputate eros id accumsan. Quisque pretium leo quis velit posuere, ac tempor ligula ultricies. Nullam ultrices venenatis convallis. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce pellentesque id urna at bibendum. Vivamus tincidunt urna a dapibus tincidunt. Duis vitae felis nec sapien dignissim aliquet. Fusce sagittis nulla id magna congue interdum eget ac ante.</p>
+        <p>In tempus sem nec felis accumsan, non dapibus urna porttitor. Nunc sit amet enim sit amet mauris sodales auctor ut viverra quam. Sed magna felis, placerat vitae quam nec, semper consectetur enim. Proin ac lectus luctus, tempor orci vel, commodo arcu. Aliquam vestibulum dolor eros, non varius ex facilisis at. In neque ipsum, tempus a urna tristique, gravida fermentum velit. Integer ac elementum odio. Sed suscipit lorem eget purus posuere, sed accumsan libero rhoncus. Sed mollis aliquam arcu, ut varius justo tincidunt ut. Vestibulum mi eros, iaculis eget tortor vel, tincidunt finibus lacus. Fusce ultrices ipsum quis feugiat tincidunt. Etiam pretium vulputate aliquam. Mauris volutpat ex et neque consectetur, convallis efficitur risus fringilla.</p>
+    </div>
+</div>
+
+<!-- Main content tariffs -->
+<div id="tariffDiv" class="w3-main w3-container pageTab" style="margin-top:117px; display: none">
+    <table class="w3-table w3-bordered">
+        <tr>
+            <th>Название</th>
+            <th>Стоимость</th>
+            <th>Условия</th>
+        </tr>
+        <tr>
+            <td>Бесплатный</td>
+            <td>0 руб./месяц</td>
+            <td>
+                <ul>
+                    <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
+                    <li>Etiam sollicitudin dui in odio malesuada ornare.</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>Дешевый</td>
+            <td>50 руб./месяц</td>
+
+            <td>
+                <ul>
+                    <li>Morbi aliquet sapien a mi sodales ullamcorper.</li>
+                    <li>Maecenas euismod metus nec tellus molestie, quis ullamcorper orci vulputate.</li>
+                    <li>Donec eleifend tortor sit amet lectus fermentum, a lacinia metus efficitur.</li>
+                    <li>Morbi eget mauris et purus egestas rhoncus sit amet eget arcu.</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>Дорогой</td>
+            <td>200 руб./месяц</td>
+            <td>
+                <ul>
+                    <li>Fusce vulputate leo vitae turpis pellentesque, et ultrices quam blandit.</li>
+                    <li>Vestibulum condimentum lorem vitae orci accumsan, id porttitor tellus lacinia.</li>
+                    <li>Nulla viverra ante a elit laoreet, id rhoncus eros elementum.</li>
+                    <li>Proin non elit sed tortor facilisis egestas a at velit.</li>
+                    <li>Fusce posuere ligula in ligula cursus finibus.</li>
+                    <li>Mauris sit amet quam vel nisl elementum imperdiet.</li>
+                </ul>
+            </td>
+        </tr>
+    </table>
 </div>
 
 </body>

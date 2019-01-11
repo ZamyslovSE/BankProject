@@ -22,6 +22,7 @@ import web.exception.UnauthorizedException;
 import web.exception.UserNotFoundException;
 import web.exception.UsernameTakenException;
 import web.pojo.Account;
+import web.pojo.Token;
 import web.pojo.TransactionRequest;
 import web.pojo.User;
 
@@ -36,7 +37,7 @@ import java.util.logging.Logger;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-    @SuppressWarnings("unused")
+@SuppressWarnings("unused")
 @Controller
 public class RESTController {
 
@@ -48,7 +49,7 @@ public class RESTController {
 
     private static final Logger log = Logger.getLogger(RESTController.class.getName());
     private static final String GENERIC_ERROR = "Error, please try again later";
-    private static final String RESOURCE_FOLDER = "resources";
+//    private static final String RESOURCE_FOLDER = "resources";
 
     @Autowired
     public RESTController(BankDAO bankDAO, AccountDAO accountDAO) {
@@ -74,7 +75,15 @@ public class RESTController {
     }
 
     @GetMapping("/client")
-    public /*void*/String client(HttpServletResponse response) throws IOException {
+    public /*void*/String client(HttpServletResponse response, @RequestBody String json) throws IOException {
+        String token = objectMapper.readValue(json, Token.class).getToken();
+        if (token==null){
+            throw new IllegalArgumentException("No auth token in request");
+        }
+        if (!loggedIn(token)){
+//            throw new UnauthorizedException("Not authorized");
+            return "redirect:/home";
+        }
         return "/client";
     }
 
@@ -119,7 +128,9 @@ public class RESTController {
     }
 
     @RequestMapping(value="/logout", method = {POST,GET})
-    public String logout() {
+    public String logout(@RequestBody String json) throws IOException {
+        String token = objectMapper.readValue(json, Token.class).getToken();
+        SessionService.getInstance().endUserSession(token);
         return "redirect:/home";
     }
 
@@ -128,14 +139,14 @@ public class RESTController {
     public String accounts(HttpServletRequest request, HttpServletResponse response, @RequestBody String json) {
         String token;
         try {
-            if (!loggedIn(request)){
-                throw new UnauthorizedException("Not authorized");
-            }
-
-            ObjectNode objectNode = objectMapper.readValue(json, ObjectNode.class);
-            token = objectNode.get("token_bank").textValue();
+//            ObjectNode objectNode = objectMapper.readValue(json, ObjectNode.class);
+//            token = objectNode.get("token_bank").textValue();
+            token = objectMapper.readValue(json, Token.class).getToken();
             if (token==null){
                 throw new IllegalArgumentException("No client id in request");
+            }
+            if (!loggedIn(token)){
+                throw new UnauthorizedException("Not authorized");
             }
             List<Account> accountList = accountDAO.getAccounts(SessionService.getInstance().getUserSession(token).getClientId());
             String result = objectMapper.writeValueAsString(accountList);
@@ -148,8 +159,7 @@ public class RESTController {
         }
     }
 
-    public boolean loggedIn(HttpServletRequest request){
-//        request.getHeader("");
-        return true;
+    public boolean loggedIn(String token){
+        return SessionService.getInstance().contains(token);
     }
 }

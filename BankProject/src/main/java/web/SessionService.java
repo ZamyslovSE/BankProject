@@ -52,6 +52,10 @@ public class SessionService {
         return userCache.get(token);
     }
 
+    public void endUserSession(String token){
+        userCache.remove(token);
+    }
+
     private class LruCache<A, B> extends LinkedHashMap<A, B> {
         private final int maxEntries;
 
