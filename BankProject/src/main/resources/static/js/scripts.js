@@ -17,7 +17,7 @@ function logout() {
 function testAlert(){
     alert("Hello! I am an alert box!!");
 }
-function render() {
+function initClient() {
     console.log("cookie " + getCookie("token_bank"));
 
     //get data for table
@@ -30,26 +30,41 @@ function render() {
     http.send(JSON.stringify(params));
     var result = null;
     http.onload = function() {
-        result = JSON.parse(http.response);
-        console.log("in: " + result);
-        accounts = JSON.parse(http.response);
-        drawTable(result);
-        drawDDList(result, 'selectDiv');
-        drawDDList(result, 'selectDiv1');
+        console.log("start onload");
+        if (http.status === 403) {
+            console.log("onload 403");
+            window.location.href="home";
+        }
+
+        if (http.status === 404) {
+            console.log("onload 404");
+            window.location.href="home";
+        }
+
+        if (http.status === 202) {
+            console.log("onload 202");
+            result = JSON.parse(http.response);
+            console.log("in: " + result);
+            accounts = JSON.parse(http.response);
+            var headers = ["Номер счета","Баланс"];
+            var fields = ["accountNumber","balance"];
+            drawTable(result, headers, fields, 'tableDiv');
+            drawDDList(result, 'selectDiv');
+            drawDDList(result, 'selectDiv1');
+        }
     }
     console.log("end get")
 }
 
-function drawTable(data){
+function drawTable(data, headers, fields, id){
     // get the reference for the body
-    var div1 = document.getElementById('tableDiv');
+    var div1 = document.getElementById(id);
 
     // creates a <table> element
     var tbl = document.createElement("table");
     tbl.setAttribute("class", "w3-table-all");
 
     //headers
-    var headers = ["Номер счета","Баланс"];
     var headerRow = document.createElement("tr");
     for (var i = 0; i < headers.length; i++) {
         var cell = document.createElement("td");
@@ -62,19 +77,11 @@ function drawTable(data){
     for (var i = 0; i < data.length; i++) {
         var row = document.createElement("tr");
 
-        var cell1 = document.createElement("td");
-        cell1.appendChild(document.createTextNode(data[i]["accountNumber"]));
-        row.appendChild(cell1);
-        var cell2 = document.createElement("td");
-        cell2.appendChild(document.createTextNode(data[i]["balance"]));
-        row.appendChild(cell2);
-
-        // create cells in row
-        //for (key in data[i]) {
-        //    var cell = document.createElement("td");
-        //    cell.appendChild(document.createTextNode(data[i][key]));
-        //    row.appendChild(cell);
-        //}
+        for (var j = 0; j < headers.length; j++) {
+            var cell1 = document.createElement("td");
+            cell1.appendChild(document.createTextNode(data[i][fields[j]]));
+            row.appendChild(cell1);
+        }
 
         tbl.appendChild(row); // add the row to the end of the table body
     }

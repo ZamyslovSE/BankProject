@@ -12,9 +12,9 @@ import java.util.List;
  */
 public interface AccountDAO {
 
-    BigDecimal withdrawFunds(TransactionRequest transaction) throws InsufficientFundsException;
-    void addFunds(TransactionRequest transaction);
-    void transfer(TransactionRequest transaction) throws InsufficientFundsException;
-    BigDecimal checkBalance(String passport);
     List<Account> getAccounts(String clientId);
+
+    void transfer(String senderAccount, String receiverAccount, Double amount);
+
+    Account getAccountByNumber(String accountNumber);
 }

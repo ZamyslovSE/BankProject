@@ -13,6 +13,9 @@
 <head>
     <script type="text/javascript" th:src="@{/js/home.js}"></script>
     <script type="text/javascript" th:src="@{/js/token_cookie.js}"></script>
+    <script>
+            window.onload=initHome;
+    </script>
 </head>
 <body>
 
@@ -27,7 +30,7 @@
         <!--<a class="w3-bar-item w3-button w3-hide-medium w3-hide-small w3-hover-white w3-padding-16" onclick="document.getElementById('id01').style.display='block'">Личный кабинет</a>-->
 
         <a class="w3-bar-item w3-button w3-hover-white w3-padding-16" onclick="chooseTab('indexDiv')">Главная</a>
-        <a class="w3-bar-item w3-button w3-hover-white w3-padding-16" onclick="chooseTab('tariffDiv')">Тарифы</a>
+        <a class="w3-bar-item w3-button w3-hover-white w3-padding-16" onclick="chooseTab('tariffDiv')">Услуги</a>
         <a class="w3-bar-item w3-button w3-right w3-hover-white w3-padding-16" href="javascript:void(0)" onclick="document.getElementById('loginForm').style.display='block'">Личный кабинет</a>
     </div>
 </div>
@@ -83,50 +86,14 @@
 
 <!-- Main content tariffs -->
 <div id="tariffDiv" class="w3-main w3-container pageTab" style="margin-top:117px; display: none">
-    <table class="w3-table w3-bordered">
-        <tr>
-            <th>Название</th>
-            <th>Стоимость</th>
-            <th>Условия</th>
-        </tr>
-        <tr>
-            <td>Бесплатный</td>
-            <td>0 руб./месяц</td>
-            <td>
-                <ul>
-                    <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
-                    <li>Etiam sollicitudin dui in odio malesuada ornare.</li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td>Дешевый</td>
-            <td>50 руб./месяц</td>
+    <h1>Тарифы для дебитовых карт</h1>
+    <div id="debitTable" ></div>
 
-            <td>
-                <ul>
-                    <li>Morbi aliquet sapien a mi sodales ullamcorper.</li>
-                    <li>Maecenas euismod metus nec tellus molestie, quis ullamcorper orci vulputate.</li>
-                    <li>Donec eleifend tortor sit amet lectus fermentum, a lacinia metus efficitur.</li>
-                    <li>Morbi eget mauris et purus egestas rhoncus sit amet eget arcu.</li>
-                </ul>
-            </td>
-        </tr>
-        <tr>
-            <td>Дорогой</td>
-            <td>200 руб./месяц</td>
-            <td>
-                <ul>
-                    <li>Fusce vulputate leo vitae turpis pellentesque, et ultrices quam blandit.</li>
-                    <li>Vestibulum condimentum lorem vitae orci accumsan, id porttitor tellus lacinia.</li>
-                    <li>Nulla viverra ante a elit laoreet, id rhoncus eros elementum.</li>
-                    <li>Proin non elit sed tortor facilisis egestas a at velit.</li>
-                    <li>Fusce posuere ligula in ligula cursus finibus.</li>
-                    <li>Mauris sit amet quam vel nisl elementum imperdiet.</li>
-                </ul>
-            </td>
-        </tr>
-    </table>
+    <h1>Тарифы для счетов</h1>
+    <div id="accountTable" ></div>
+
+    <h1>Тарифы для вкладов</h1>
+    <div id="depositTable" ></div>
 </div>
 
 </body>

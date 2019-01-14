@@ -71,65 +71,6 @@ public class BankDAOImpl implements BankDAO {
             throw new UserNotFoundException(login);
         }
     }
-//
-//    @Override
-//    public void deleteUser(String id) {
-//        Map<String,String> params = new HashMap<>();
-//        params.put("id",id);
-//        jdbcTemplate.update("DELETE FROM Users WHERE id=:id", params);
-//    }
-//
-//    @Override
-//    @Transactional
-//    public BigDecimal withdrawFunds(TransactionRequest transaction) throws InsufficientFundsException { //TODO refactor to BigDecimal
-//        log.info(String.format("Withdrawing %s to %s.",transaction.getAmount(),transaction.getReceiverId()));
-//        BigDecimal currentBalance = checkBalance(transaction.getReceiverId());
-//        if (currentBalance.compareTo(transaction.getAmount()) >= 0) {
-//            BigDecimal newBalance = currentBalance.subtract(transaction.getAmount());
-//            Map<String, String> params = new HashMap<>();
-//            params.put("passport", transaction.getReceiverId());
-//            params.put("balance", newBalance.toString());
-//            jdbcTemplate.update("UPDATE Users SET balance=:balance WHERE passport=:passport", params);
-//            return newBalance;
-//        } else {
-//            throw new InsufficientFundsException(String.format("Could not withdraw %s, not enough money on account.",transaction.getAmount()));
-//        }
-//    }
-//
-//    @Override
-//    @Transactional
-//    public void addFunds(TransactionRequest transaction) {
-//        log.info(String.format("Adding %s to %s.", transaction.getAmount(), transaction.getReceiverId()));
-//        BigDecimal currentBalance = checkBalance(transaction.getReceiverId());
-//        BigDecimal newBalance = currentBalance.add(transaction.getAmount());
-//        Map<String, String> params = new HashMap<>();
-//        params.put("passport", transaction.getReceiverId());
-//        params.put("balance", newBalance.toString());
-//        jdbcTemplate.update("UPDATE Users SET balance=:balance WHERE passport=:passport", params);
-//    }
-//
-//    @Override
-//    public BigDecimal checkBalance(String passport) {
-//        Map<String,String> params = new HashMap<>();
-//        params.put("passport", passport);
-//        BigDecimal balance = jdbcTemplate.queryForObject(SQL_CHECK_BALANCE, params, BigDecimal.class);
-//        return balance;
-//    }
-//
-//    @Override
-//    @Transactional
-//    public void transfer(TransactionRequest transaction) throws InsufficientFundsException{
-////        log.info(String.format("Sending %s from %s to %s.",amount,senderPassport,receiverPassport));
-//        withdrawFunds(transaction);
-//        addFunds(transaction);
-//
-//    }
-//
-//    @Override
-//    public List<TransactionRequest> getOperations(String passport) {
-//        Map<String,String> params = new HashMap<>();
-//        params.put("passport", passport);
-//        List<TransactionRequest> resultList = jdbcTemplate.queryForList(SQL_SELECT_OPER_BY_PASSPORT, params, TransactionRequest.class);
-//        return resultList;
-//    }
+
+
 }

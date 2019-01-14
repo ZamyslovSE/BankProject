@@ -42,7 +42,7 @@ public class SessionService {
         return userCache.containsKey(sessionId);
     }
 
-    public String getSessionId(String clientId){
+    public String createUserSession(String clientId){
         String token = UUID.randomUUID().toString();
         userCache.put(token,new UserInfo(clientId));
         return token;
